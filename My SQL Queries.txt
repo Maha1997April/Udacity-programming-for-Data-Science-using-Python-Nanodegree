@@ -1,0 +1,64 @@
+
+My Queries
+Q1:
+
+Select f.title as film_title, ctg.name as category_name, count(rental_id) as rental_count
+from rental r
+left join Inventory i on r.inventory_id=i.inventory_id
+ join film_Category fic  on i.film_id=fic.film_id
+ join film f on f.film_id=fic.film_id
+  join category ctg on fic.category_id=ctg.category_id
+WHERE ctg.name IN ('Animation','Children','Classics','Comedy','Family','Music')
+group by film_title, category_name
+order by category_name, film_title;
+Q2:
+SELECT AVG (rental_count), SUM (rental_count)
+FROM (
+Select f.title as film_title, ctg.name as category_name, count(rental_id) as rental_count
+from rental r
+left join Inventory i on r.inventory_id=i.inventory_id
+ join film_Category fic  on i.film_id=fic.film_id
+ join film f on f.film_id=fic.film_id
+  join category ctg on fic.category_id=ctg.category_id
+WHERE ctg.name IN ('Animation','Children','Classics','Comedy','Family','Music')
+group by film_title, category_name
+order by category_name, film_title
+) nested;
+
+
+
+
+
+
+
+Q3:
+Select distinct (category_name), sum(rental_count) over (partition by category_name) as total_rental_count
+from (
+Select f.title as film_title, ctg.name as category_name, count(rental_id) as rental_count
+from rental r
+left join Inventory i on r.inventory_id=i.inventory_id
+ join film_Category fic  on i.film_id=fic.film_id
+ join film f on f.film_id=fic.film_id
+  join category ctg on fic.category_id=ctg.category_id
+WHERE ctg.name IN ('Animation','Children','Classics','Comedy','Family','Music')
+group by film_title, category_name
+order by category_name, film_title
+) sub
+
+Q4:
+with t1 as (Select distinct (category_name), sum(rental_count) over (partition by category_name) as total_rental_count
+from (
+Select f.title as film_title, ctg.name as category_name, count(rental_id) as rental_count
+from rental r
+left join Inventory i on r.inventory_id=i.inventory_id
+ join film_Category fic  on i.film_id=fic.film_id
+ join film f on f.film_id=fic.film_id
+  join category ctg on fic.category_id=ctg.category_id
+WHERE ctg.name IN ('Animation','Children','Classics','Comedy','Family','Music')
+group by film_title, category_name
+order by category_name, film_title
+) sub
+order by total_rental_count)
+
+select min(total_rental_count) as MIN_total_rental_count, max(total_rental_count)as MAX_total_rental_count
+from t1;
